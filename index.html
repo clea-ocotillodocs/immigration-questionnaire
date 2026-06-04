@@ -48,7 +48,7 @@
 </head>
 <body>
 <div class="container">
-  <div class="header">
+  <div id="app-header" class="header">
     <div class="header-text">
       <div class="biz">Ocotillo Document Services, LLC</div>
       <h1 id="hdr-title">Immigration Questionnaire</h1>
@@ -67,6 +67,9 @@
 </div>
 <script>
 const SCRIPT_URL = "https://script.google.com/macros/s/AKfycby3qTMQuYN2qmoecttqesoebnSEV7zoXgdsqUHf28-x48f-BoJRjzc1WxKaWakWhxJ9/exec";
+
+// Prevent browser from pre-fetching the script URL
+if ('serviceWorker' in navigator) navigator.serviceWorker.getRegistrations().then(r => r.forEach(sw => sw.unregister()));
 
 const tx = {
   en: {
