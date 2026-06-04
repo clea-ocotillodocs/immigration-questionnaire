@@ -1,0 +1,488 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Immigration Questionnaire – Ocotillo Document Services</title>
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; background: #f5f4f0; color: #1a1a1a; min-height: 100vh; padding: 1.5rem 1rem; }
+  .container { max-width: 680px; margin: 0 auto; }
+  .header { background: #B94B2E; border-radius: 12px; padding: 1rem 1.25rem; margin-bottom: 1.25rem; display: flex; justify-content: space-between; align-items: flex-start; }
+  .header-text .biz { font-size: 11px; font-weight: 600; color: #f5cfc4; letter-spacing: 0.08em; text-transform: uppercase; margin-bottom: 2px; }
+  .header-text h1 { font-size: 22px; font-weight: 500; color: #fff; margin-bottom: 2px; }
+  .header-text .subtitle { font-size: 13px; color: #f5cfc4; }
+  .lang-toggle { display: flex; background: rgba(0,0,0,0.2); border-radius: 20px; padding: 3px; gap: 2px; flex-shrink: 0; margin-left: 12px; }
+  .lang-toggle button { background: transparent; color: #f5cfc4; border: none; border-radius: 16px; padding: 4px 12px; font-size: 12px; font-weight: 500; cursor: pointer; }
+  .lang-toggle button.active { background: #fff; color: #B94B2E; }
+  .tabs { display: flex; gap: 8px; border-bottom: 0.5px solid #ddd; margin-bottom: 1.5rem; }
+  .tabs button { background: none; border: none; border-bottom: 2px solid transparent; padding: 8px 16px; cursor: pointer; font-size: 14px; font-weight: 400; color: #888; margin-bottom: -1px; }
+  .tabs button.active { border-bottom-color: #B94B2E; color: #B94B2E; font-weight: 500; }
+  .progress-row { display: flex; justify-content: space-between; margin-bottom: 6px; font-size: 13px; color: #888; }
+  .progress-bar { height: 4px; background: #ddd; border-radius: 2px; margin-bottom: 1.5rem; }
+  .progress-fill { height: 100%; background: #4A7C3F; border-radius: 2px; transition: width 0.3s; }
+  .card { background: #fff; border: 0.5px solid #ddd; border-radius: 12px; padding: 1.25rem; }
+  .card h2 { font-size: 15px; font-weight: 500; margin-bottom: 1.25rem; }
+  .field { margin-bottom: 16px; }
+  .field label { display: block; font-size: 13px; font-weight: 500; margin-bottom: 3px; }
+  .hint { font-size: 12px; color: #4A7C3F; margin-bottom: 5px; display: flex; gap: 4px; }
+  .hint span { font-weight: 600; flex-shrink: 0; }
+  input, select, textarea { width: 100%; padding: 8px 10px; font-size: 14px; border: 0.5px solid #ccc; border-radius: 8px; font-family: inherit; outline: none; background: #fff; color: #1a1a1a; }
+  input:focus, select:focus, textarea:focus { border-color: #B94B2E; box-shadow: 0 0 0 2px rgba(185,75,46,0.1); }
+  textarea { resize: vertical; }
+  .nav { display: flex; justify-content: space-between; margin-top: 1.25rem; }
+  .nav button { padding: 8px 20px; font-size: 13px; border: 0.5px solid #ccc; border-radius: 8px; background: #fff; cursor: pointer; font-family: inherit; }
+  .nav button:hover { background: #f5f4f0; }
+  .nav button:disabled { opacity: 0.4; cursor: not-allowed; }
+  .nav .btn-primary { background: #B94B2E; color: #fff; border-color: #B94B2E; }
+  .nav .btn-primary:hover { background: #a33f25; }
+  .legal { font-size: 11px; color: #aaa; margin-top: 1.25rem; text-align: center; line-height: 1.6; border-top: 0.5px solid #eee; padding-top: 1rem; }
+  .error { font-size: 13px; color: #c0392b; margin-top: 1rem; text-align: center; }
+  .success { text-align: center; padding: 2.5rem 1rem; }
+  .success .check { width: 56px; height: 56px; border-radius: 50%; background: #eaf3de; display: flex; align-items: center; justify-content: center; margin: 0 auto 16px; font-size: 26px; color: #4A7C3F; }
+  .success h2 { font-size: 17px; font-weight: 500; margin-bottom: 8px; }
+  .success p { font-size: 14px; color: #888; margin-bottom: 1.5rem; }
+  .success-btns { display: flex; gap: 8px; justify-content: center; flex-wrap: wrap; }
+  .success-btns button { padding: 8px 16px; font-size: 13px; border: 0.5px solid #ccc; border-radius: 8px; background: #fff; cursor: pointer; font-family: inherit; }
+</style>
+</head>
+<body>
+<div class="container">
+  <div class="header">
+    <div class="header-text">
+      <div class="biz">Ocotillo Document Services, LLC</div>
+      <h1 id="hdr-title">Immigration Questionnaire</h1>
+      <div class="subtitle" id="hdr-subtitle">Collecting information for forms I-130, I-485, I-765, I-131 &amp; I-864</div>
+    </div>
+    <div class="lang-toggle">
+      <button class="active" onclick="setLang('en')">EN</button>
+      <button onclick="setLang('es')">ES</button>
+    </div>
+  </div>
+
+  <div class="tabs">
+    <button class="active" onclick="setTab(0)" id="tab0">Beneficiary</button>
+    <button onclick="setTab(1)" id="tab1">Petitioner</button>
+  </div>
+
+  <div id="form-area"></div>
+</div>
+
+<script>
+const SCRIPT_URL = "https://script.google.com/macros/s/AKfycby3qTMQuYN2qmoecttqesoebnSEV7zoXgdsqUHf28-x48f-BoJRjzc1WxKaWakWhxJ9/exec";
+
+const tx = {
+  en: {
+    title: "Immigration Questionnaire",
+    subtitle: "Collecting information for forms I-130, I-485, I-765, I-131 & I-864",
+    tabs: ["Beneficiary","Petitioner"],
+    section: "Section", of: "of", complete: "% complete",
+    back: "← Back", next: "Next →", submit: "Submit ✓", submitting: "Submitting...",
+    doneTitle: "questionnaire complete",
+    doneMsg: "Your responses have been submitted. Our team will review your information and be in touch.",
+    startOver: "Start over", continueTo: "Continue to Petitioner →",
+    errorMsg: "There was a problem submitting. Please try again or contact us directly.",
+    legal: "Ocotillo Document Services, LLC is not a law firm and does not provide legal advice. We are a document preparation service and do not represent clients before USCIS or any other government agency. If you have legal questions about your immigration case, please consult a licensed immigration attorney."
+  },
+  es: {
+    title: "Cuestionario de Inmigración",
+    subtitle: "Recopilando información para los formularios I-130, I-485, I-765, I-131 e I-864",
+    tabs: ["Beneficiario/a","Peticionario/a"],
+    section: "Sección", of: "de", complete: "% completado",
+    back: "← Atrás", next: "Siguiente →", submit: "Enviar ✓", submitting: "Enviando...",
+    doneTitle: "cuestionario completo",
+    doneMsg: "Sus respuestas han sido enviadas. Nuestro equipo revisará su información y se pondrá en contacto.",
+    startOver: "Comenzar de nuevo", continueTo: "Continuar al Peticionario →",
+    errorMsg: "Hubo un problema al enviar. Por favor intente de nuevo o contáctenos directamente.",
+    legal: "Ocotillo Document Services, LLC no es un despacho de abogados y no proporciona asesoramiento legal. Somos un servicio de preparación de documentos y no representamos a clientes ante USCIS ni ninguna otra agencia gubernamental. Si tiene preguntas legales sobre su caso de inmigración, consulte a un abogado de inmigración autorizado."
+  }
+};
+
+const sections = {
+  beneficiary: {
+    en: [
+      { title: "Personal Information", fields: [
+        { id:"b_last_name", label:"Last Name (Family Name)", type:"text", placeholder:"As it appears on your passport or ID" },
+        { id:"b_first_name", label:"First Name", type:"text", placeholder:"As it appears on your passport or ID" },
+        { id:"b_middle_name", label:"Middle Name", type:"text", placeholder:"Leave blank if you have no middle name" },
+        { id:"b_other_names", label:"Other Names Used", type:"text", placeholder:"Maiden name, nicknames, aliases, or name changes" },
+        { id:"b_dob", label:"Date of Birth", type:"date" },
+        { id:"b_cob", label:"Country of Birth", type:"text", placeholder:"Enter the country where you were born" },
+        { id:"b_citizenship", label:"Country of Citizenship / Nationality", type:"text", placeholder:"Country that issued your passport" },
+        { id:"b_ssn", label:"Social Security Number", type:"text", placeholder:"Format: XXX-XX-XXXX (leave blank if none)" },
+        { id:"b_anumber", label:"Alien Registration Number (A-Number)", type:"text", placeholder:"Starts with A followed by 8-9 digits (leave blank if none)" },
+        { id:"b_address", label:"Current Mailing Address", type:"textarea", placeholder:"Street number and name, Apt/Unit, City, State, ZIP code" },
+        { id:"b_phone", label:"Phone Number", type:"tel", placeholder:"Include area code, e.g. (602) 555-0100" },
+        { id:"b_email", label:"Email Address", type:"email", placeholder:"Use an email you check regularly" },
+        { id:"b_gender", label:"Gender", type:"select", options:["Select","Male","Female","Nonbinary","Prefer not to say"] },
+        { id:"b_marital", label:"Marital Status", type:"select", options:["Select","Single","Married","Divorced","Widowed","Separated"] },
+      ]},
+      { title: "Entry & Immigration History", fields: [
+        { id:"b_entry_date", label:"Date of Last Entry into the U.S.", type:"date", hint:"Check your passport stamp or I-94 record at i94.cbp.dhs.gov" },
+        { id:"b_port_entry", label:"Place of Last Entry (Port of Entry)", type:"text", placeholder:"City and state where you entered the U.S., e.g. San Diego, CA" },
+        { id:"b_visa_entry", label:"Visa / Status at Last Entry", type:"text", placeholder:"e.g. B-2 Tourist, F-1 Student, J-1 Exchange Visitor" },
+        { id:"b_current_status", label:"Current Immigration Status", type:"text", placeholder:"e.g. F-1, H-4, Parolee, Unlawful Presence, TPS" },
+        { id:"b_status_exp", label:"Current Status Expiration Date", type:"date", hint:"Found on your visa stamp, I-94, or approval notice (I-797). Leave blank if D/S or not applicable." },
+        { id:"b_i94", label:"I-94 Admission Number", type:"text", placeholder:"11-digit number found at i94.cbp.dhs.gov" },
+        { id:"b_deported", label:"Have you ever been deported or removed from the U.S.?", type:"select", options:["Select","No","Yes"] },
+        { id:"b_deported_explain", label:"If yes, please explain (date, reason, country removed to)", type:"textarea", placeholder:"Provide as much detail as possible - dates, locations, and circumstances" },
+        { id:"b_overstay", label:"Have you ever overstayed a visa?", type:"select", options:["Select","No","Yes"] },
+        { id:"b_prior_485", label:"Have you previously applied for a green card or adjustment of status?", type:"select", options:["Select","No","Yes"] },
+        { id:"b_prior_485_explain", label:"If yes, when and what was the outcome?", type:"textarea", placeholder:"Include year filed, which USCIS office, and result (approved, denied, withdrawn)" },
+      ]},
+      { title: "I-485 - Adjustment of Status", fields: [
+        { id:"b_arrested", label:"Have you ever been arrested, cited, charged, or detained by any law enforcement?", type:"select", options:["Select","No","Yes"] },
+        { id:"b_arrested_explain", label:"If yes, please explain (offense, date, location, and outcome)", type:"textarea", placeholder:"Include ALL incidents, even if charges were dropped, expunged, or you were not convicted" },
+        { id:"b_org", label:"Have you ever been a member of or associated with any organization, party, or group?", type:"select", options:["Select","No","Yes"] },
+        { id:"b_org_list", label:"If yes, list all organizations with dates of membership", type:"textarea", placeholder:"Include civic, political, professional, and religious organizations" },
+        { id:"b_medical", label:"Do you have any serious medical or mental health conditions?", type:"select", options:["Select","No","Yes"] },
+        { id:"b_medical_explain", label:"If yes, please describe", type:"textarea", placeholder:"List any conditions that may require a medical waiver" },
+        { id:"b_claimed_citizen", label:"Have you ever claimed to be a U.S. citizen?", type:"select", options:["Select","No","Yes"] },
+        { id:"b_voted", label:"Have you ever voted in a U.S. federal, state, or local election?", type:"select", options:["Select","No","Yes"] },
+      ]},
+      { title: "I-765 - Employment Authorization", fields: [
+        { id:"b_work_auth", label:"Are you currently authorized to work in the U.S.?", type:"select", options:["Select","No","Yes"] },
+        { id:"b_prior_ead", label:"Have you previously been issued an Employment Authorization Document (EAD)?", type:"select", options:["Select","No","Yes"] },
+        { id:"b_ead_exp", label:"Most recent EAD expiration date", type:"date", hint:"Found on the front of your EAD card under Card Expires" },
+        { id:"b_ead_number", label:"Most recent EAD Card Number", type:"text", placeholder:"Found on the back of your EAD card, e.g. SRC0000000000" },
+        { id:"b_ead_category", label:"Eligibility Category", type:"text", placeholder:"e.g. (c)(9) for pending I-485 applicants - leave blank if unsure" },
+      ]},
+      { title: "I-131 - Travel Document / Advance Parole", fields: [
+        { id:"b_travel_need", label:"Do you need to travel outside the U.S. while your case is pending?", type:"select", options:["Select","No","Yes"] },
+        { id:"b_travel_countries", label:"Countries you plan to visit", type:"text", placeholder:"List all countries you intend to visit, e.g. Mexico, Guatemala" },
+        { id:"b_travel_reason", label:"Reason for travel", type:"textarea", placeholder:"e.g. family emergency, vacation, medical treatment - be specific" },
+        { id:"b_travel_depart", label:"Estimated departure date", type:"date", hint:"Do NOT travel outside the U.S. without an approved Advance Parole document - it may result in abandonment of your case" },
+        { id:"b_travel_return", label:"Estimated return date", type:"date" },
+        { id:"b_prior_ap", label:"Have you previously been issued advance parole?", type:"select", options:["Select","No","Yes"] },
+      ]},
+      { title: "Family Information", fields: [
+        { id:"b_spouse_name", label:"Spouse's Full Legal Name (if married)", type:"text", placeholder:"Last name, First name, Middle name" },
+        { id:"b_spouse_dob", label:"Spouse's Date of Birth", type:"date" },
+        { id:"b_spouse_cob", label:"Spouse's Country of Birth", type:"text", placeholder:"Country where your spouse was born" },
+        { id:"b_num_children", label:"Number of Children", type:"number", placeholder:"Include biological, adopted, and stepchildren" },
+        { id:"b_children_list", label:"Names and Dates of Birth of All Children", type:"textarea", placeholder:"List each child on a new line, e.g.: Maria Lopez - 03/15/2010" },
+        { id:"b_prior_marriages", label:"Prior marriages (if any)", type:"textarea", placeholder:"For each prior marriage: full name of ex-spouse, date married, date ended, and how it ended" },
+      ]},
+    ],
+    es: [
+      { title: "Información Personal", fields: [
+        { id:"b_last_name", label:"Apellido(s)", type:"text", placeholder:"Tal como aparece en su pasaporte o identificación" },
+        { id:"b_first_name", label:"Nombre(s)", type:"text", placeholder:"Tal como aparece en su pasaporte o identificación" },
+        { id:"b_middle_name", label:"Segundo Nombre", type:"text", placeholder:"Déjelo en blanco si no tiene segundo nombre" },
+        { id:"b_other_names", label:"Otros Nombres Usados", type:"text", placeholder:"Nombre de soltera, apodos, alias o cambios de nombre" },
+        { id:"b_dob", label:"Fecha de Nacimiento", type:"date" },
+        { id:"b_cob", label:"País de Nacimiento", type:"text", placeholder:"Ingrese el país donde nació" },
+        { id:"b_citizenship", label:"País de Ciudadanía / Nacionalidad", type:"text", placeholder:"País que emitió su pasaporte" },
+        { id:"b_ssn", label:"Número de Seguro Social", type:"text", placeholder:"Formato: XXX-XX-XXXX (déjelo en blanco si no tiene)" },
+        { id:"b_anumber", label:"Número de Registro de Extranjero (Número-A)", type:"text", placeholder:"Comienza con A seguido de 8-9 dígitos (déjelo en blanco si no tiene)" },
+        { id:"b_address", label:"Dirección Postal Actual", type:"textarea", placeholder:"Número y nombre de la calle, Apto/Unidad, Ciudad, Estado, Código Postal" },
+        { id:"b_phone", label:"Número de Teléfono", type:"tel", placeholder:"Incluya el código de área, ej. (602) 555-0100" },
+        { id:"b_email", label:"Correo Electrónico", type:"email", placeholder:"Use un correo que revise con frecuencia" },
+        { id:"b_gender", label:"Género", type:"select", options:["Seleccionar","Masculino","Femenino","No binario","Prefiero no decir"] },
+        { id:"b_marital", label:"Estado Civil", type:"select", options:["Seleccionar","Soltero/a","Casado/a","Divorciado/a","Viudo/a","Separado/a"] },
+      ]},
+      { title: "Historial de Entrada e Inmigración", fields: [
+        { id:"b_entry_date", label:"Fecha de Última Entrada a los EE.UU.", type:"date", hint:"Verifique el sello en su pasaporte o su registro I-94 en i94.cbp.dhs.gov" },
+        { id:"b_port_entry", label:"Lugar de Última Entrada (Puerto de Entrada)", type:"text", placeholder:"Ciudad y estado donde entró a EE.UU., ej. San Diego, CA" },
+        { id:"b_visa_entry", label:"Visa / Estatus al Momento de la Última Entrada", type:"text", placeholder:"ej. B-2 Turista, F-1 Estudiante, J-1 Visitante de Intercambio" },
+        { id:"b_current_status", label:"Estatus Migratorio Actual", type:"text", placeholder:"ej. F-1, H-4, Libertad Condicional, Presencia Ilegal, TPS" },
+        { id:"b_status_exp", label:"Fecha de Vencimiento del Estatus Actual", type:"date", hint:"Se encuentra en el sello de visa, I-94 o aviso de aprobación (I-797). Déjelo en blanco si dice D/S o no aplica." },
+        { id:"b_i94", label:"Número de Admisión I-94", type:"text", placeholder:"Número de 11 dígitos disponible en i94.cbp.dhs.gov" },
+        { id:"b_deported", label:"¿Alguna vez ha sido deportado/a o removido/a de los EE.UU.?", type:"select", options:["Seleccionar","No","Sí"] },
+        { id:"b_deported_explain", label:"Si respondió sí, explique (fecha, motivo, país al que fue enviado/a)", type:"textarea", placeholder:"Proporcione la mayor cantidad de detalles posible" },
+        { id:"b_overstay", label:"¿Alguna vez ha permanecido más tiempo del permitido por su visa?", type:"select", options:["Seleccionar","No","Sí"] },
+        { id:"b_prior_485", label:"¿Ha solicitado anteriormente una tarjeta verde o ajuste de estatus?", type:"select", options:["Seleccionar","No","Sí"] },
+        { id:"b_prior_485_explain", label:"Si respondió sí, ¿cuándo y cuál fue el resultado?", type:"textarea", placeholder:"Incluya el año de presentación, la oficina de USCIS y el resultado" },
+      ]},
+      { title: "I-485 - Ajuste de Estatus", fields: [
+        { id:"b_arrested", label:"¿Alguna vez ha sido arrestado/a, citado/a, acusado/a o detenido/a?", type:"select", options:["Seleccionar","No","Sí"] },
+        { id:"b_arrested_explain", label:"Si respondió sí, explique (delito, fecha, lugar y resultado)", type:"textarea", placeholder:"Incluya TODOS los incidentes, aunque los cargos hayan sido retirados" },
+        { id:"b_org", label:"¿Ha sido o es miembro de alguna organización, partido o grupo?", type:"select", options:["Seleccionar","No","Sí"] },
+        { id:"b_org_list", label:"Si respondió sí, liste todas las organizaciones con fechas de membresía", type:"textarea", placeholder:"Incluya organizaciones cívicas, políticas, profesionales y religiosas" },
+        { id:"b_medical", label:"¿Tiene alguna condición médica o de salud mental grave?", type:"select", options:["Seleccionar","No","Sí"] },
+        { id:"b_medical_explain", label:"Si respondió sí, descríbala", type:"textarea", placeholder:"Liste las condiciones que puedan requerir una dispensa médica" },
+        { id:"b_claimed_citizen", label:"¿Alguna vez ha afirmado ser ciudadano/a de los EE.UU.?", type:"select", options:["Seleccionar","No","Sí"] },
+        { id:"b_voted", label:"¿Alguna vez ha votado en alguna elección de EE.UU.?", type:"select", options:["Seleccionar","No","Sí"] },
+      ]},
+      { title: "I-765 - Autorización de Empleo", fields: [
+        { id:"b_work_auth", label:"¿Actualmente tiene autorización para trabajar en los EE.UU.?", type:"select", options:["Seleccionar","No","Sí"] },
+        { id:"b_prior_ead", label:"¿Le han emitido anteriormente un Documento de Autorización de Empleo (EAD)?", type:"select", options:["Seleccionar","No","Sí"] },
+        { id:"b_ead_exp", label:"Fecha de vencimiento del EAD más reciente", type:"date", hint:"Se encuentra en el frente de su tarjeta EAD bajo Card Expires" },
+        { id:"b_ead_number", label:"Número de tarjeta EAD más reciente", type:"text", placeholder:"Se encuentra en el reverso de su tarjeta EAD, ej. SRC0000000000" },
+        { id:"b_ead_category", label:"Categoría de Elegibilidad", type:"text", placeholder:"ej. (c)(9) para solicitantes con I-485 pendiente" },
+      ]},
+      { title: "I-131 - Documento de Viaje / Libertad Condicional Anticipada", fields: [
+        { id:"b_travel_need", label:"¿Necesita viajar fuera de los EE.UU. mientras su caso está pendiente?", type:"select", options:["Seleccionar","No","Sí"] },
+        { id:"b_travel_countries", label:"Países que planea visitar", type:"text", placeholder:"Liste todos los países que tiene previsto visitar" },
+        { id:"b_travel_reason", label:"Motivo del viaje", type:"textarea", placeholder:"ej. emergencia familiar, vacaciones, tratamiento médico" },
+        { id:"b_travel_depart", label:"Fecha estimada de salida", type:"date", hint:"NO viaje fuera de los EE.UU. sin un documento de Libertad Condicional Anticipada aprobado" },
+        { id:"b_travel_return", label:"Fecha estimada de regreso", type:"date" },
+        { id:"b_prior_ap", label:"¿Le han otorgado libertad condicional anticipada anteriormente?", type:"select", options:["Seleccionar","No","Sí"] },
+      ]},
+      { title: "Información Familiar", fields: [
+        { id:"b_spouse_name", label:"Nombre Legal Completo del Cónyuge (si está casado/a)", type:"text", placeholder:"Apellido, Nombre, Segundo nombre" },
+        { id:"b_spouse_dob", label:"Fecha de Nacimiento del Cónyuge", type:"date" },
+        { id:"b_spouse_cob", label:"País de Nacimiento del Cónyuge", type:"text", placeholder:"País donde nació su cónyuge" },
+        { id:"b_num_children", label:"Número de Hijos", type:"number", placeholder:"Incluya hijos biológicos, adoptados e hijastros" },
+        { id:"b_children_list", label:"Nombres y Fechas de Nacimiento de Todos los Hijos", type:"textarea", placeholder:"Liste cada hijo en una línea nueva" },
+        { id:"b_prior_marriages", label:"Matrimonios anteriores (si los hay)", type:"textarea", placeholder:"Nombre del ex-cónyuge, fecha de matrimonio, fecha de finalización y cómo terminó" },
+      ]},
+    ]
+  },
+  petitioner: {
+    en: [
+      { title: "Personal Information", fields: [
+        { id:"p_last_name", label:"Last Name (Family Name)", type:"text", placeholder:"As it appears on your U.S. passport or naturalization certificate" },
+        { id:"p_first_name", label:"First Name", type:"text", placeholder:"As it appears on your U.S. passport or naturalization certificate" },
+        { id:"p_middle_name", label:"Middle Name", type:"text", placeholder:"Leave blank if you have no middle name" },
+        { id:"p_other_names", label:"Other Names Used", type:"text", placeholder:"Maiden name, nicknames, aliases, or name changes" },
+        { id:"p_dob", label:"Date of Birth", type:"date" },
+        { id:"p_cob", label:"Country of Birth", type:"text", placeholder:"Enter the country where you were born" },
+        { id:"p_ssn", label:"Social Security Number", type:"text", placeholder:"Format: XXX-XX-XXXX" },
+        { id:"p_address", label:"Current Mailing Address", type:"textarea", placeholder:"Street number and name, Apt/Unit, City, State, ZIP code" },
+        { id:"p_phone", label:"Phone Number", type:"tel", placeholder:"Include area code, e.g. (602) 555-0100" },
+        { id:"p_email", label:"Email Address", type:"email", placeholder:"Use an email you check regularly" },
+        { id:"p_marital", label:"Marital Status", type:"select", options:["Select","Single","Married","Divorced","Widowed","Separated"] },
+        { id:"p_status", label:"Immigration Status", type:"select", options:["Select","U.S. Citizen by Birth","U.S. Citizen by Naturalization","Lawful Permanent Resident (Green Card)"] },
+        { id:"p_status_date", label:"Date of Naturalization or Green Card (if applicable)", type:"date", hint:"Found on your naturalization certificate or green card" },
+        { id:"p_cert_number", label:"Certificate / Card Number", type:"text", placeholder:"Naturalization certificate number or green card number (e.g. SRC0000000000)" },
+      ]},
+      { title: "I-130 - Petition for Alien Relative", fields: [
+        { id:"p_relationship", label:"Relationship to Beneficiary", type:"select", options:["Select","Spouse","Parent","Child (under 21, unmarried)","Son/Daughter (21 or older or married)","Sibling"] },
+        { id:"p_marriage_date", label:"Date of Marriage to Beneficiary (if spouse)", type:"date", hint:"Must match the date on your official marriage certificate" },
+        { id:"p_marriage_place", label:"Place of Marriage (City, State or Country)", type:"text", placeholder:"e.g. Phoenix, Arizona or Guadalajara, Mexico" },
+        { id:"p_prior_marriages", label:"Prior marriages (if any)", type:"textarea", placeholder:"For each prior marriage: full name of ex-spouse, date married, date ended, and how it ended" },
+        { id:"p_prior_i130", label:"Have you previously filed an I-130 for this or any other person?", type:"select", options:["Select","No","Yes"] },
+        { id:"p_prior_i130_explain", label:"If yes, for whom and what was the outcome?", type:"textarea", placeholder:"Include the beneficiary's name, your relationship, year filed, and result" },
+      ]},
+      { title: "I-864 - Affidavit of Support", fields: [
+        { id:"p_employer", label:"Current Employer Name", type:"text", placeholder:"Full legal name of your employer, or Self-employed if applicable" },
+        { id:"p_employer_address", label:"Employer Address", type:"textarea", placeholder:"Street, City, State, ZIP code of your workplace" },
+        { id:"p_occupation", label:"Occupation / Job Title", type:"text", placeholder:"Your current job title, e.g. Registered Nurse, Construction Supervisor" },
+        { id:"p_income", label:"Annual Gross Income (current)", type:"text", placeholder:"Your total yearly income before taxes, e.g. $52,000" },
+        { id:"p_household_size", label:"Household Size", type:"number", placeholder:"Count yourself + dependents + the beneficiary", hint:"Include yourself, anyone you claimed on your last tax return, any dependents not on your return, and the beneficiary" },
+        { id:"p_household_members", label:"Names and relationships of all persons in your household", type:"textarea", placeholder:"List each person on a new line, e.g.: Juan Lopez - Spouse" },
+        { id:"p_tax_year", label:"Most recent federal tax year filed", type:"text", placeholder:"e.g. 2024" },
+        { id:"p_tax_income", label:"Income reported on most recent tax return", type:"text", placeholder:"The amount shown on Line 11 of your Form 1040, e.g. $48,500" },
+        { id:"p_tax_joint", label:"Did you file jointly?", type:"select", options:["Select","No","Yes"] },
+        { id:"p_assets", label:"Do you have assets to supplement income if needed?", type:"select", options:["Select","No","Yes"] },
+        { id:"p_assets_detail", label:"If yes, describe assets and estimated value", type:"textarea", placeholder:"e.g. Savings account - $10,000; Home equity - $50,000; Stocks/bonds - $5,000" },
+        { id:"p_prior_i864", label:"Have you previously filed an I-864 for another person?", type:"select", options:["Select","No","Yes"] },
+      ]},
+      { title: "Supporting Documents Checklist", fields: [
+        { id:"p_doc_passport", label:"Passport copy available?", type:"select", options:["Select","Yes","No","In progress"], hint:"Provide copies of all pages, including blank pages" },
+        { id:"p_doc_birth", label:"Birth certificate available?", type:"select", options:["Select","Yes","No","In progress"], hint:"Must be official government-issued; foreign documents need certified English translation" },
+        { id:"p_doc_marriage", label:"Marriage certificate available? (if applicable)", type:"select", options:["Select","Yes","No","N/A"], hint:"Must be an official civil marriage certificate; religious certificates alone are not sufficient" },
+        { id:"p_doc_divorce", label:"Divorce decree(s) available? (if applicable)", type:"select", options:["Select","Yes","No","N/A"], hint:"Required for ALL prior marriages - one for each ex-spouse" },
+        { id:"p_doc_status", label:"Proof of U.S. citizenship or LPR status available?", type:"select", options:["Select","Yes","No","In progress"], hint:"U.S. passport, naturalization certificate, or green card (front and back)" },
+        { id:"p_doc_taxes", label:"Last 3 years of federal tax returns available?", type:"select", options:["Select","Yes - all 3","Yes - some","No"], hint:"Include all schedules and W-2s; if filed electronically, include IRS transcript" },
+        { id:"p_doc_paystubs", label:"Recent pay stubs available? (last 6 months)", type:"select", options:["Select","Yes","No","Self-employed"], hint:"If self-employed, provide your most recent 1099s and a signed letter confirming self-employment" },
+        { id:"p_doc_photos", label:"Passport-style photos available?", type:"select", options:["Select","Yes","No"], hint:"2 photos per applicant, 2x2 inches, white background, taken within the last 6 months" },
+        { id:"p_doc_notes", label:"Additional notes or documents to mention", type:"textarea", placeholder:"List any other documents you have or any special circumstances we should know about" },
+      ]},
+    ],
+    es: [
+      { title: "Información Personal", fields: [
+        { id:"p_last_name", label:"Apellido(s)", type:"text", placeholder:"Tal como aparece en su pasaporte de EE.UU. o certificado de naturalización" },
+        { id:"p_first_name", label:"Nombre(s)", type:"text", placeholder:"Tal como aparece en su pasaporte de EE.UU. o certificado de naturalización" },
+        { id:"p_middle_name", label:"Segundo Nombre", type:"text", placeholder:"Déjelo en blanco si no tiene segundo nombre" },
+        { id:"p_other_names", label:"Otros Nombres Usados", type:"text", placeholder:"Nombre de soltera, apodos, alias o cambios de nombre" },
+        { id:"p_dob", label:"Fecha de Nacimiento", type:"date" },
+        { id:"p_cob", label:"País de Nacimiento", type:"text", placeholder:"Ingrese el país donde nació" },
+        { id:"p_ssn", label:"Número de Seguro Social", type:"text", placeholder:"Formato: XXX-XX-XXXX" },
+        { id:"p_address", label:"Dirección Postal Actual", type:"textarea", placeholder:"Número y nombre de la calle, Apto/Unidad, Ciudad, Estado, Código Postal" },
+        { id:"p_phone", label:"Número de Teléfono", type:"tel", placeholder:"Incluya el código de área, ej. (602) 555-0100" },
+        { id:"p_email", label:"Correo Electrónico", type:"email", placeholder:"Use un correo que revise con frecuencia" },
+        { id:"p_marital", label:"Estado Civil", type:"select", options:["Seleccionar","Soltero/a","Casado/a","Divorciado/a","Viudo/a","Separado/a"] },
+        { id:"p_status", label:"Estatus Migratorio", type:"select", options:["Seleccionar","Ciudadano/a de EE.UU. por nacimiento","Ciudadano/a de EE.UU. por naturalización","Residente Permanente Legal (Tarjeta Verde)"] },
+        { id:"p_status_date", label:"Fecha de Naturalización o Tarjeta Verde (si aplica)", type:"date", hint:"Se encuentra en su certificado de naturalización o tarjeta verde" },
+        { id:"p_cert_number", label:"Número de Certificado / Tarjeta", type:"text", placeholder:"Número del certificado de naturalización o de la tarjeta verde" },
+      ]},
+      { title: "I-130 - Petición de Familiar Extranjero", fields: [
+        { id:"p_relationship", label:"Relación con el/la Beneficiario/a", type:"select", options:["Seleccionar","Cónyuge","Padre/Madre","Hijo/a (menor de 21, soltero/a)","Hijo/a (mayor de 21 o casado/a)","Hermano/a"] },
+        { id:"p_marriage_date", label:"Fecha de Matrimonio con el/la Beneficiario/a (si es cónyuge)", type:"date", hint:"Debe coincidir con la fecha en su certificado de matrimonio oficial" },
+        { id:"p_marriage_place", label:"Lugar del Matrimonio (Ciudad, Estado o País)", type:"text", placeholder:"ej. Phoenix, Arizona o Guadalajara, México" },
+        { id:"p_prior_marriages", label:"Matrimonios anteriores (si los hay)", type:"textarea", placeholder:"Nombre del ex-cónyuge, fecha de matrimonio, fecha de finalización y cómo terminó" },
+        { id:"p_prior_i130", label:"¿Ha presentado anteriormente un I-130 para esta u otra persona?", type:"select", options:["Seleccionar","No","Sí"] },
+        { id:"p_prior_i130_explain", label:"Si respondió sí, ¿para quién y cuál fue el resultado?", type:"textarea", placeholder:"Incluya el nombre, relación, año de presentación y resultado" },
+      ]},
+      { title: "I-864 - Declaración Jurada de Patrocinio Económico", fields: [
+        { id:"p_employer", label:"Nombre del Empleador Actual", type:"text", placeholder:"Nombre legal completo de su empleador, o Trabajador independiente si aplica" },
+        { id:"p_employer_address", label:"Dirección del Empleador", type:"textarea", placeholder:"Calle, Ciudad, Estado, Código Postal de su lugar de trabajo" },
+        { id:"p_occupation", label:"Ocupación / Título del Puesto", type:"text", placeholder:"Su título actual, ej. Enfermero/a Registrado/a, Supervisor de Construcción" },
+        { id:"p_income", label:"Ingresos Brutos Anuales (actuales)", type:"text", placeholder:"Su ingreso total anual antes de impuestos, ej. $52,000" },
+        { id:"p_household_size", label:"Tamaño del Hogar", type:"number", placeholder:"Cuente a usted mismo + dependientes + el/la beneficiario/a", hint:"Incluya a usted mismo, dependientes declarados, dependientes no declarados y al/la beneficiario/a" },
+        { id:"p_household_members", label:"Nombres y relaciones de todas las personas en su hogar", type:"textarea", placeholder:"Liste cada persona en una línea nueva, ej.: Juan López - Cónyuge" },
+        { id:"p_tax_year", label:"Año fiscal federal más reciente presentado", type:"text", placeholder:"ej. 2024" },
+        { id:"p_tax_income", label:"Ingresos declarados en la declaración más reciente", type:"text", placeholder:"El monto en la Línea 11 de su Formulario 1040, ej. $48,500" },
+        { id:"p_tax_joint", label:"¿Presentó declaración conjunta?", type:"select", options:["Seleccionar","No","Sí"] },
+        { id:"p_assets", label:"¿Tiene bienes para complementar sus ingresos?", type:"select", options:["Seleccionar","No","Sí"] },
+        { id:"p_assets_detail", label:"Si respondió sí, describa los bienes y su valor estimado", type:"textarea", placeholder:"ej. Cuenta de ahorros - $10,000; Capital inmobiliario - $50,000" },
+        { id:"p_prior_i864", label:"¿Ha presentado anteriormente un I-864 para otra persona?", type:"select", options:["Seleccionar","No","Sí"] },
+      ]},
+      { title: "Lista de Documentos de Apoyo", fields: [
+        { id:"p_doc_passport", label:"¿Tiene copia del pasaporte?", type:"select", options:["Seleccionar","Sí","No","En progreso"], hint:"Proporcione copias de todas las páginas, incluyendo las páginas en blanco" },
+        { id:"p_doc_birth", label:"¿Tiene acta de nacimiento?", type:"select", options:["Seleccionar","Sí","No","En progreso"], hint:"Debe ser oficial; documentos extranjeros necesitan traducción certificada al inglés" },
+        { id:"p_doc_marriage", label:"¿Tiene acta de matrimonio? (si aplica)", type:"select", options:["Seleccionar","Sí","No","N/A"], hint:"Debe ser un acta civil oficial; los certificados religiosos no son suficientes" },
+        { id:"p_doc_divorce", label:"¿Tiene decreto(s) de divorcio? (si aplica)", type:"select", options:["Seleccionar","Sí","No","N/A"], hint:"Requerido para TODOS los matrimonios anteriores" },
+        { id:"p_doc_status", label:"¿Tiene prueba de ciudadanía de EE.UU. o estatus de residente?", type:"select", options:["Seleccionar","Sí","No","En progreso"], hint:"Pasaporte de EE.UU., certificado de naturalización o tarjeta verde (frente y reverso)" },
+        { id:"p_doc_taxes", label:"¿Tiene las declaraciones de impuestos de los últimos 3 años?", type:"select", options:["Seleccionar","Sí - los 3","Sí - algunos","No"], hint:"Incluya todos los anexos y W-2s; si presentó electrónicamente, incluya la transcripción del IRS" },
+        { id:"p_doc_paystubs", label:"¿Tiene talones de pago recientes? (últimos 6 meses)", type:"select", options:["Seleccionar","Sí","No","Trabajador independiente"], hint:"Si trabaja de forma independiente, proporcione sus 1099 más recientes y una carta firmada" },
+        { id:"p_doc_photos", label:"¿Tiene fotos tipo pasaporte?", type:"select", options:["Seleccionar","Sí","No"], hint:"2 fotos por solicitante, 5x5 cm, fondo blanco, tomadas en los últimos 6 meses" },
+        { id:"p_doc_notes", label:"Notas adicionales o documentos a mencionar", type:"textarea", placeholder:"Liste cualquier otro documento o circunstancias especiales" },
+      ]},
+    ]
+  }
+};
+
+let lang = "en";
+let activeTab = 0;
+let steps = [0, 0];
+let formData = [{}, {}];
+let submitted = [false, false];
+
+function setLang(l) {
+  lang = l;
+  document.querySelectorAll(".lang-toggle button").forEach((b, i) => {
+    b.classList.toggle("active", (i === 0 && l === "en") || (i === 1 && l === "es"));
+  });
+  document.getElementById("hdr-title").textContent = tx[l].title;
+  document.getElementById("hdr-subtitle").textContent = tx[l].subtitle;
+  document.getElementById("tab0").textContent = tx[l].tabs[0];
+  document.getElementById("tab1").textContent = tx[l].tabs[1];
+  render();
+}
+
+function setTab(t) {
+  activeTab = t;
+  document.getElementById("tab0").classList.toggle("active", t === 0);
+  document.getElementById("tab1").classList.toggle("active", t === 1);
+  render();
+}
+
+function getSections() {
+  return activeTab === 0 ? sections.beneficiary[lang] : sections.petitioner[lang];
+}
+
+function getFirstNameId() { return activeTab === 0 ? "b_first_name" : "p_first_name"; }
+function getLastNameId() { return activeTab === 0 ? "b_last_name" : "p_last_name"; }
+
+function render() {
+  const area = document.getElementById("form-area");
+  const t = tx[lang];
+  const secs = getSections();
+  const step = steps[activeTab];
+  const total = secs.length;
+  const data = formData[activeTab];
+
+  if (submitted[activeTab]) {
+    area.innerHTML = `
+      <div class="success">
+        <div class="check">✓</div>
+        <h2>${t.tabs[activeTab]} ${t.doneTitle}</h2>
+        <p>${t.doneMsg}</p>
+        <div class="success-btns">
+          <button onclick="resetForm()">${t.startOver}</button>
+          ${activeTab === 0 && !submitted[1] ? `<button onclick="setTab(1)">${t.continueTo}</button>` : ""}
+        </div>
+      </div>`;
+    return;
+  }
+
+  const pct = Math.round((step / total) * 100);
+  const sec = secs[step];
+
+  let fieldsHtml = sec.fields.map(f => {
+    let input = "";
+    const val = data[f.id] || "";
+    if (f.type === "textarea") {
+      input = `<textarea id="${f.id}" rows="3" placeholder="${f.placeholder||""}" oninput="saveField('${f.id}',this.value)">${val}</textarea>`;
+    } else if (f.type === "select") {
+      const opts = f.options.map(o => `<option${o===val?" selected":""}>${o}</option>`).join("");
+      input = `<select id="${f.id}" onchange="saveField('${f.id}',this.value)">${opts}</select>`;
+    } else {
+      input = `<input type="${f.type}" id="${f.id}" value="${val}" placeholder="${f.placeholder||""}" oninput="saveField('${f.id}',this.value)" />`;
+    }
+    const hintHtml = f.hint ? `<div class="hint"><span>i</span>${f.hint}</div>` : "";
+    return `<div class="field"><label for="${f.id}">${f.label}</label>${hintHtml}${input}</div>`;
+  }).join("");
+
+  area.innerHTML = `
+    <div class="progress-row">
+      <span>${t.section} ${step+1} ${t.of} ${total}</span>
+      <span>${pct}${t.complete}</span>
+    </div>
+    <div class="progress-bar"><div class="progress-fill" style="width:${pct}%"></div></div>
+    <div class="card">
+      <h2>${sec.title}</h2>
+      ${fieldsHtml}
+    </div>
+    <div id="error-msg" class="error" style="display:none">${t.errorMsg}</div>
+    <div class="nav">
+      <button onclick="goBack()" ${step===0?"disabled":""} >${t.back}</button>
+      <button class="btn-primary" onclick="goNext()" id="next-btn">${step===total-1?t.submit:t.next}</button>
+    </div>
+    <div class="legal">${t.legal}</div>`;
+}
+
+function saveField(id, val) {
+  formData[activeTab][id] = val;
+}
+
+function goBack() {
+  if (steps[activeTab] > 0) { steps[activeTab]--; render(); window.scrollTo(0,0); }
+}
+
+async function goNext() {
+  const secs = getSections();
+  if (steps[activeTab] < secs.length - 1) {
+    steps[activeTab]++;
+    render();
+    window.scrollTo(0,0);
+    return;
+  }
+  const btn = document.getElementById("next-btn");
+  btn.disabled = true;
+  btn.textContent = tx[lang].submitting;
+  document.getElementById("error-msg").style.display = "none";
+
+  const data = formData[activeTab];
+  const allSecs = getSections();
+  const responses = allSecs.flatMap(s => s.fields.map(f => ({ label: f.label, value: data[f.id] || "" })));
+  const firstName = data[getFirstNameId()] || "";
+  const lastName = data[getLastNameId()] || "";
+  const fullName = [firstName, lastName].filter(Boolean).join(" ") || "Unknown";
+  const tab = activeTab === 0 ? "Beneficiary" : "Petitioner";
+
+  try {
+    const res = await fetch(SCRIPT_URL, {
+      method: "POST",
+      headers: { "Content-Type": "text/plain" },
+      body: JSON.stringify({ tab, fullName, responses })
+    });
+    const json = await res.json();
+    if (json.result === "success") {
+      submitted[activeTab] = true;
+      render();
+    } else {
+      throw new Error(json.message);
+    }
+  } catch (err) {
+    console.error(err);
+    document.getElementById("error-msg").style.display = "block";
+    btn.disabled = false;
+    btn.textContent = tx[lang].submit;
+  }
+}
+
+function resetForm() {
+  steps[activeTab] = 0;
+  formData[activeTab] = {};
+  submitted[activeTab] = false;
+  render();
+}
+
+render();
+</script>
+</body>
+</html>
